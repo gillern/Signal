@@ -142,6 +142,20 @@ function Signal:Await(...)
 	coroutine.yield(...)
 end
 
+function Signal:ResumeThreads(...)
+	if (self.Threads) then
+		for Key = #self.Threads, 1, -1 do
+			coroutine.resume(self.Threads[Key], ...)
+			
+			table.remove(self.Threads, Key)
+		end
+		
+		if (#self.Threads <= 0) then
+			self.Threads = nil
+		end
+	end
+end
+
 function Signal:Fire(...)
 	return self:FireAsync(...)
 end
@@ -165,17 +179,7 @@ function Signal:FireSync(...)
 		end
 	end
 	
-	if (self.Threads) then
-		for Key = #self.Threads, 1, -1 do
-			coroutine.resume(self.Threads[Key], ...)
-			
-			table.remove(self.Threads, Key)
-		end
-		
-		if (#self.Threads <= 0) then
-			self.Threads = nil
-		end
-	end
+	self:ResumeThreads(...)
 end
 
 function Signal:FireAsync(...)
@@ -191,17 +195,7 @@ function Signal:FireAsync(...)
 		end
 	end
 	
-	if (self.Threads) then
-		for Key = #self.Threads, 1, -1 do
-			coroutine.resume(self.Threads[Key], ...)
-			
-			table.remove(self.Threads, Key)
-		end
-		
-		if (#self.Threads <= 0) then
-			self.Threads = nil
-		end
-	end
+	self:ResumeThreads(...)
 end
 
 return Signal
